@@ -10,7 +10,6 @@ import React, {
 import {
   ArrowLeft,
   CheckCircle,
-  Star,
   Phone,
   ChevronLeft,
   ChevronDown,
@@ -23,7 +22,7 @@ import Autoplay from "embla-carousel-autoplay";
 import { motion, AnimatePresence } from "framer-motion";
 import QuoteForm from "../quote-form";
 
-const ImageModal = ({ images, activeIndex, onClose }) => {
+const ImageModal = ({ images = [], activeIndex = 0, onClose }) => {
   const [emblaRef, embla] = useEmblaCarousel(
     { loop: true, startIndex: activeIndex },
     [Autoplay({ delay: 3500 })]
@@ -33,21 +32,21 @@ const ImageModal = ({ images, activeIndex, onClose }) => {
 
   const handleOutsideClick = useCallback(
     (e) => {
-      if (e.target === overlayRef.current) onClose();
+      if (e.target === overlayRef.current) onClose?.();
     },
     [onClose]
   );
 
   useEffect(() => {
     const handleEsc = (e) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") onClose?.();
     };
     document.addEventListener("keydown", handleEsc);
     return () => document.removeEventListener("keydown", handleEsc);
   }, [onClose]);
 
-  const scrollPrev = () => embla && embla.scrollPrev();
-  const scrollNext = () => embla && embla.scrollNext();
+  const scrollPrev = () => embla?.scrollPrev?.();
+  const scrollNext = () => embla?.scrollNext?.();
 
   return (
     <AnimatePresence>
@@ -68,7 +67,7 @@ const ImageModal = ({ images, activeIndex, onClose }) => {
           className="relative w-full max-w-2xl rounded-2xl"
         >
           <motion.button
-            onClick={onClose}
+            onClick={() => onClose?.()}
             initial={{ opacity: 0, scale: 0 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2 }}
@@ -81,11 +80,6 @@ const ImageModal = ({ images, activeIndex, onClose }) => {
 
           <motion.button
             onClick={scrollPrev}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 }}
-            whileHover={{ scale: 1.1, x: -5 }}
-            whileTap={{ scale: 0.9 }}
             className="absolute left-3 top-1/2 -translate-y-1/2 z-10 bg-primary hover:bg-amber-900 text-white rounded-full p-2 cursor-pointer"
           >
             <ChevronLeft size={28} />
@@ -93,20 +87,12 @@ const ImageModal = ({ images, activeIndex, onClose }) => {
 
           <motion.button
             onClick={scrollNext}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 }}
-            whileHover={{ scale: 1.1, x: 5 }}
-            whileTap={{ scale: 0.9 }}
             className="absolute right-3 top-1/2 -translate-y-1/2 z-10 bg-primary hover:bg-amber-900 text-white rounded-full p-2 cursor-pointer"
           >
             <ChevronRight size={28} />
           </motion.button>
 
           <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.1 }}
             className="overflow-hidden rounded-lg backdrop-blur-3xl shadow-2xl"
             ref={emblaRef}
           >
@@ -114,13 +100,13 @@ const ImageModal = ({ images, activeIndex, onClose }) => {
               {images?.map((img, idx) => (
                 <motion.img
                   key={idx}
-                  src={img.url}
-                  onClick={onClose}
+                  src={img?.url}
+                  onClick={() => onClose?.()}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.5 }}
                   className="w-full md:h-[70vh] h-full object-contain flex-shrink-0 cursor-pointer"
-                  alt={img.fileName || `Preview ${idx + 1}`}
+                  alt={img?.fileName || `Preview ${idx + 1}`}
                 />
               ))}
             </div>
@@ -131,7 +117,7 @@ const ImageModal = ({ images, activeIndex, onClose }) => {
   );
 };
 
-const ServiceDetail = ({ service }) => {
+const ServiceDetail = ({ service = {} }) => {
   const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -145,25 +131,22 @@ const ServiceDetail = ({ service }) => {
   ]);
 
   useEffect(() => {
-    if (!emblaApi) return;
-    const onSelect = () => setActiveImageIndex(emblaApi.selectedScrollSnap());
-    emblaApi.on("select", onSelect);
-    return () => emblaApi.off("select", onSelect);
+    const onSelect = () =>
+      setActiveImageIndex(emblaApi?.selectedScrollSnap?.() ?? 0);
+
+    emblaApi?.on?.("select", onSelect);
+    return () => emblaApi?.off?.("select", onSelect);
   }, [emblaApi]);
 
   useEffect(() => {
-    if (!emblaApi || !emblaApi.plugins().autoplay) return;
-    const autoplayPlugin = emblaApi.plugins().autoplay;
+    const autoplayPlugin = emblaApi?.plugins?.().autoplay;
+    if (!autoplayPlugin) return;
 
-    if (modalOpen) {
-      autoplayPlugin.stop();
-    } else {
-      autoplayPlugin.play();
-    }
+    modalOpen ? autoplayPlugin?.stop?.() : autoplayPlugin?.play?.();
   }, [modalOpen, emblaApi]);
 
   const handleThumbnailClick = (index) => {
-    if (emblaApi) emblaApi.scrollTo(index);
+    emblaApi?.scrollTo?.(index);
     openModal(index);
   };
 
@@ -173,18 +156,21 @@ const ServiceDetail = ({ service }) => {
   };
 
   const displayedThumbnails = useMemo(() => {
-    if (!allImages || allImages.length === 0) return [];
-    const items = allImages.map((img, index) => ({
+    if (!allImages?.length) return [];
+
+    const items = allImages?.map((img, index) => ({
       src: img,
       originalIndex: index,
     }));
-    const part2 = items.slice(activeImageIndex);
-    const part1 = items.slice(0, activeImageIndex);
+
+    const part2 = items?.slice(activeImageIndex);
+    const part1 = items?.slice(0, activeImageIndex);
+
     return [...part2, ...part1];
   }, [allImages, activeImageIndex]);
 
-  const words = service?.about?.split(" ") || [];
-  const isLong = words.length > 100;
+  const words = service?.about?.split(" ") ?? [];
+  const isLong = words?.length > 100;
 
   return (
     <motion.div
@@ -192,17 +178,11 @@ const ServiceDetail = ({ service }) => {
       animate="visible"
       className="min-h-screen bg-gray-50"
     >
-      <motion.div
-        initial={{ y: -50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6 }}
-        className="bg-white shadow-sm "
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 ">
+      {/* Back Button */}
+      <motion.div className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <motion.button
-            onClick={() => router.back()}
-            whileHover={{ x: -5, scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            onClick={() => router.back?.()}
             className="flex items-center space-x-2 text-primary hover:text-amber-700 font-medium cursor-pointer"
           >
             <ArrowLeft className="h-5 w-5" />
@@ -213,26 +193,25 @@ const ServiceDetail = ({ service }) => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid lg:grid-cols-2 gap-12">
+          {/* Left Section */}
           <div className="space-y-6">
             <motion.div
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.3 }}
               className="overflow-hidden rounded-2xl shadow-2xl relative"
               ref={emblaRef}
             >
               <div className="flex">
-                {allImages.map((img, index) => (
+                {allImages?.map((img, index) => (
                   <motion.div
                     className="relative flex-shrink-0 w-full cursor-pointer"
                     key={index}
                     style={{ flex: "0 0 100%" }}
                     onClick={() => openModal(index)}
-                    whileHover={{ scale: 1.05 }}
                   >
                     <img
-                      src={img.url}
+                      src={img?.url}
                       alt={
-                        img.fileName || `${service?.title} - Image ${index + 1}`
+                        img?.fileName ||
+                        `${service?.title} - Image ${index + 1}`
                       }
                       className="w-full h-96 object-cover hover:opacity-90 transition"
                     />
@@ -241,42 +220,45 @@ const ServiceDetail = ({ service }) => {
               </div>
             </motion.div>
 
+            {/* Thumbnails */}
             <motion.div className="grid grid-cols-4 gap-4">
-              {displayedThumbnails.slice(0, 4).map((thumbnail, idx) => (
+              {displayedThumbnails?.slice(0, 4)?.map((thumbnail, idx) => (
                 <motion.div
-                  key={thumbnail.originalIndex}
+                  key={thumbnail?.originalIndex}
                   className="relative cursor-pointer"
-                  onClick={() => handleThumbnailClick(thumbnail.originalIndex)}
-                  whileHover={{ scale: 1.05, y: -5 }}
+                  onClick={() => handleThumbnailClick(thumbnail?.originalIndex)}
                 >
                   <img
-                    src={thumbnail.src.url}
+                    src={thumbnail?.src?.url}
                     alt={
-                      thumbnail.src.fileName ||
-                      `Thumbnail ${thumbnail.originalIndex + 1}`
+                      thumbnail?.src?.fileName ||
+                      `Thumbnail ${thumbnail?.originalIndex + 1}`
                     }
                     className="w-full h-24 object-cover rounded-lg shadow-md hover:shadow-lg opacity-70 hover:opacity-100"
                   />
-                  {idx === 3 && allImages.length > 4 && (
+
+                  {idx === 3 && allImages?.length > 4 && (
                     <motion.div className="absolute inset-0 bg-black/60 text-white font-bold text-lg flex items-center justify-center rounded-lg">
-                      +{allImages.length - 4}
+                      +{allImages?.length - 4}
                     </motion.div>
                   )}
                 </motion.div>
               ))}
             </motion.div>
 
+            {/* About Section */}
             <motion.div className="pt-4">
               <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
                 About
               </h2>
+
               <div className="mt-4 text-gray-700 relative">
                 {!showFull && isLong ? (
                   <div className="relative">
                     <p className="leading-relaxed line-clamp-10">
                       {service?.about}
                     </p>
-                    <div className="absolute bottom-0 right-0 bg-white pl-2 ">
+                    <div className="absolute bottom-0 right-0 bg-white pl-2">
                       <button
                         onClick={() => setShowFull(true)}
                         className="text-amber-600 hover:underline cursor-pointer"
@@ -288,15 +270,14 @@ const ServiceDetail = ({ service }) => {
                 ) : (
                   <>
                     <p className="leading-relaxed">{service?.about}</p>
+
                     {isLong && (
-                      <div className="mt-2">
-                        <button
-                          onClick={() => setShowFull(false)}
-                          className="text-amber-600  cursor-pointer hover:underline"
-                        >
-                          View Less
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => setShowFull(false)}
+                        className="text-amber-600 hover:underline cursor-pointer mt-2"
+                      >
+                        View Less
+                      </button>
                     )}
                   </>
                 )}
@@ -304,6 +285,7 @@ const ServiceDetail = ({ service }) => {
             </motion.div>
           </div>
 
+          {/* Right Section */}
           <div className="space-y-8">
             <motion.div>
               <h1 className="text-4xl font-bold text-gray-900 mb-4">
@@ -314,13 +296,16 @@ const ServiceDetail = ({ service }) => {
               </p>
             </motion.div>
 
+            {/* What's Included */}
             <motion.div>
               <h3 className="text-2xl font-bold text-gray-900 mb-6">
                 What's Included
               </h3>
+
               <div className="grid gap-4">
-                {service?.features.map((feature, index) => {
+                {service?.features?.map((feature, index) => {
                   const isOpen = openFeatureIndex === index;
+
                   return (
                     <motion.div
                       key={index}
@@ -334,12 +319,14 @@ const ServiceDetail = ({ service }) => {
                             {feature?.title}
                           </span>
                         </div>
+
                         {isOpen ? (
                           <ChevronUp className="h-5 w-5 text-gray-500" />
                         ) : (
                           <ChevronDown className="h-5 w-5 text-gray-500" />
                         )}
                       </div>
+
                       <AnimatePresence>
                         {isOpen && (
                           <motion.p
@@ -359,6 +346,7 @@ const ServiceDetail = ({ service }) => {
               </div>
             </motion.div>
 
+            {/* CTA Section */}
             <motion.div className="bg-gradient-to-r from-amber-50 to-orange-50 p-8 rounded-2xl">
               <div className="text-center space-y-6">
                 <div className="flex flex-col sm:flex-row gap-4">
@@ -369,12 +357,14 @@ const ServiceDetail = ({ service }) => {
                     <Phone className="h-5 w-5" />
                     <span>Call Now</span>
                   </motion.button>
+
                   <QuoteForm>
                     <motion.button className="flex-1 border-2 border-primary text-primary py-4 px-6 rounded-lg font-semibold hover:bg-primary hover:text-white flex items-center justify-center space-x-2 cursor-pointer">
                       <span>Get Quote</span>
                     </motion.button>
                   </QuoteForm>
                 </div>
+
                 <p className="text-sm text-gray-600">
                   Free consultation • 24/7 support • Quality guarantee
                 </p>
@@ -384,6 +374,7 @@ const ServiceDetail = ({ service }) => {
         </div>
       </div>
 
+      {/* Modal */}
       <AnimatePresence>
         {modalOpen && (
           <ImageModal

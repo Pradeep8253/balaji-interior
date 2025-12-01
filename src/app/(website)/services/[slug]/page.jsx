@@ -7,10 +7,10 @@ async function fetchServiceBySlug(slug) {
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/services/get-slug/${slug}`
     );
 
-    return res.data || [];
+    return res?.data || null;
   } catch (error) {
     console.error(`Error fetching service with slug ${slug}:`, error);
-    return;
+    return null;
   }
 }
 
@@ -19,8 +19,9 @@ export async function generateStaticParams() {
     const res = await axios.get(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/services/getall`
     );
-    const services = res.data || [];
-    return services.map((service) => ({ slug: service.slug }));
+
+    const services = res?.data || [];
+    return services?.map((service) => ({ slug: service?.slug })) || [];
   } catch (error) {
     console.error("Error fetching all services for params:", error);
     return [];
@@ -28,12 +29,12 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }) {
-  const { slug } = await params;
+  const { slug } = params ?? {};
   const service = await fetchServiceBySlug(slug);
 
   if (!service) {
     return {
-      title: " Balaji Luxury Interior Designers",
+      title: "Balaji Luxury Interior Designers",
       description: "The requested service could not be found.",
     };
   }
@@ -41,21 +42,24 @@ export async function generateMetadata({ params }) {
   const canonicalUrl = `https://balajiluxuryinteriordesigners.in/services/${slug}`;
 
   return {
-    title: `${service.title} ` || "Balaji Luxury Interior Designers",
-    description: service.description,
+    title: service?.title || "Balaji Luxury Interior Designers",
+    description: service?.description || "",
     alternates: { canonical: canonicalUrl },
     openGraph: {
-      title: service.title,
-      description: service.description,
+      title: service?.title,
+      description: service?.description,
       url: canonicalUrl,
-      images: Array.isArray(service.image) ? service.image : [service.image],
+      images: Array.isArray(service?.image)
+        ? service?.image
+        : service?.image
+        ? [service?.image]
+        : [],
     },
   };
 }
 
 export default async function ServicePage({ params }) {
-  const { slug } = await params;
-
+  const { slug } = params ?? {};
   const service = await fetchServiceBySlug(slug);
 
   if (!service) {
@@ -67,12 +71,14 @@ export default async function ServicePage({ params }) {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Service",
-    name: service.title,
-    description: service.description,
-    image: Array.isArray(service.image) ? service.image[0] : service.image,
+    name: service?.title ?? "",
+    description: service?.description ?? "",
+    image: Array.isArray(service?.image)
+      ? service?.image?.[0]
+      : service?.image ?? "",
     logo: "https://res.cloudinary.com/dnekarzit/image/upload/v1752933755/logo_zgrywd.jpg",
-    url: `https://balajiluxuryinteriordesigners.in/services/${service.slug}`,
-    category: service.category,
+    url: `https://balajiluxuryinteriordesigners.in/services/${service?.slug}`,
+    category: service?.category ?? "",
     areaServed: { "@type": "Place", name: "Bangalore" },
     provider: {
       "@type": "LocalBusiness",
@@ -98,10 +104,11 @@ export default async function ServicePage({ params }) {
     hasOfferCatalog: {
       "@type": "OfferCatalog",
       name: "What's Included",
-      itemListElement: service.features.map((feature) => ({
-        "@type": "Offer",
-        itemOffered: { "@type": "Service", name: feature },
-      })),
+      itemListElement:
+        service?.features?.map((feature) => ({
+          "@type": "Offer",
+          itemOffered: { "@type": "Service", name: feature },
+        })) ?? [],
     },
   };
 
