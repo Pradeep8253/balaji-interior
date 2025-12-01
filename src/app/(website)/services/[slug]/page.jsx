@@ -7,7 +7,7 @@ async function fetchServiceBySlug(slug) {
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/services/get-slug/${slug}`
     );
 
-    return data || null; 
+    return data || null;
   } catch (error) {
     console.error(`Error fetching service with slug ${slug}:`, error);
     return null;
@@ -28,7 +28,7 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }) {
-  const { slug } = await params; 
+  const { slug } = await params;
   const service = await fetchServiceBySlug(slug);
 
   if (!service) {
@@ -58,7 +58,7 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function ServicePage({ params }) {
-  const { slug } = await params; 
+  const { slug } = await params;
   const service = await fetchServiceBySlug(slug);
 
   if (!service) {
