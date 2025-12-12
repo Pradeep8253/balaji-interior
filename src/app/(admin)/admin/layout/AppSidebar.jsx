@@ -21,8 +21,8 @@ const navItems = [
     name: "Services",
     icon: <FiList />,
     subItems: [
-      { name: "Add Services", path: "/admin/services/add-services" },
       { name: "All Services", path: "/admin/services/all-services" },
+      { name: "Add Services", path: "/admin/services/add-services" },
     ],
   },
 
