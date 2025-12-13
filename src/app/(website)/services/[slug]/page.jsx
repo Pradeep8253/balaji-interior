@@ -57,8 +57,6 @@ export async function generateMetadata({ params }) {
   };
 }
 
-export const dynamic = 'force-dynamic';
-
 export default async function ServicePage({ params }) {
   const { slug } = await params;
   const service = await fetchServiceBySlug(slug);
