@@ -34,23 +34,25 @@ export const metadata = {
   ],
 };
 
-const getCategories = async () => {
+const getCategoriesWithServices = async () => {
   try {
     const res = await axios.get(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/service-categories/get`
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/services/category/get`
     );
 
     return res?.data?.data || [];
   } catch (error) {
-    console.error("Error fetching categories:", error);
+    console.error("Error fetching categories with services:", error);
     return [];
   }
 };
 
-async function Page() {
-  const categories = await getCategories();
+export const dynamic = 'force-dynamic';
 
-  return <ServiceCard category={categories} isHome={false} />;
+async function Page() {
+  const categories = await getCategoriesWithServices();
+
+  return <ServiceCard categories={categories} isHome={false} />;
 }
 
 export default Page;

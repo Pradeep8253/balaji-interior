@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
@@ -14,32 +14,33 @@ import {
 import { toast } from "react-toastify";
 import HeroSection from "../../components/HeroSection";
 
-export default function ServiceCard({ isHome }) {
-  const [categories, setCategories] = useState([]);
+export default function ServiceCard({ categories: initialCategories, isHome }) {
   const [activeFilter, setActiveFilter] = useState("all");
   const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        setLoading(true);
-        const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/services/category/get`
-        );
-        if (!mounted) return;
-        setCategories(res?.data?.data || []);
-      } catch (error) {
-        console.error("Error fetching services:", error);
-        toast.error("Failed to fetch services.");
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+    if (initialCategories && initialCategories.length > 0) {
+      setCategories(initialCategories);
+      setLoading(false);
+    } else {
+      const fetchData = async () => {
+        try {
+          setLoading(true);
+          const res = await axios.get(
+            `${process.env.NEXT_PUBLIC_BASE_URL}/api/services/category/get`
+          );
+          setCategories(res?.data?.data || []);
+        } catch (error) {
+          console.error("Error fetching services:", error);
+          toast.error("Failed to fetch services.");
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchData();
+    }
+  }, [initialCategories]);
 
   const allServices = useMemo(() => {
     return categories.flatMap((cat) =>
@@ -102,7 +103,6 @@ export default function ServiceCard({ isHome }) {
           image="/21.png"
         />
       )}
-
       <section className="py-20 bg-gradient-to-br from-slate-50 via-white to-slate-50 min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
@@ -124,7 +124,6 @@ export default function ServiceCard({ isHome }) {
               design and renovation solutions tailored to transform your space.
             </p>
           </motion.div>
-
           <motion.div
             className="flex flex-wrap justify-center gap-4 mb-16"
             variants={containerVariants}
@@ -153,7 +152,6 @@ export default function ServiceCard({ isHome }) {
               );
             })}
           </motion.div>
-
           {loading && (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[...Array(6)].map((_, i) => (
@@ -171,7 +169,6 @@ export default function ServiceCard({ isHome }) {
               ))}
             </div>
           )}
-
           {!loading && (
             <AnimatePresence mode="wait">
               <motion.div
@@ -205,7 +202,6 @@ export default function ServiceCard({ isHome }) {
                           transition={{ duration: 0.6 }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
                         {/* Rating */}
                         <motion.div
                           className="absolute top-4 right-4 bg-white/95 px-3 py-2 rounded-2xl flex items-center space-x-2 shadow-lg"
@@ -218,7 +214,6 @@ export default function ServiceCard({ isHome }) {
                             4.9
                           </span>
                         </motion.div>
-
                         {/* Premium Badge */}
                         <motion.div
                           className="absolute top-4 left-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-1"
@@ -230,7 +225,6 @@ export default function ServiceCard({ isHome }) {
                           <span>PREMIUM</span>
                         </motion.div>
                       </div>
-
                       {/* Content */}
                       <div className="p-6">
                         <span className="inline-flex items-center px-3 py-1.5 bg-amber-100 text-amber-800 text-xs font-bold rounded-xl mb-4 capitalize">
@@ -238,15 +232,12 @@ export default function ServiceCard({ isHome }) {
                             service?.category?.name ||
                             "Service"}
                         </span>
-
                         <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-amber-700">
                           {service?.title}
                         </h3>
-
                         <p className="text-gray-600 mb-5 line-clamp-2">
                           {service?.description}
                         </p>
-
                         <div className="mb-6">
                           <div className="flex items-center text-sm font-semibold text-gray-800 mb-3">
                             <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
@@ -272,7 +263,6 @@ export default function ServiceCard({ isHome }) {
                             )}
                           </ul>
                         </div>
-
                         <motion.div
                           className="w-full bg-gradient-to-r from-amber-600 to-orange-600 text-white py-3.5 px-4 rounded-2xl font-semibold flex items-center justify-center space-x-2 shadow-lg"
                           whileHover={{ scale: 1.02 }}
@@ -288,7 +278,6 @@ export default function ServiceCard({ isHome }) {
               </motion.div>
             </AnimatePresence>
           )}
-
           {!loading && filteredServices.length === 0 && (
             <motion.div
               className="text-center py-16"
