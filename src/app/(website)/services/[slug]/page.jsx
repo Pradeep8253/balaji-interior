@@ -1,6 +1,8 @@
 import axios from "axios";
 import ServiceDetail from "../../components/services/ServiceDetail";
 
+export const dynamic = 'force-dynamic';
+
 async function fetchServiceBySlug(slug) {
   try {
     const { data } = await axios.get(
@@ -14,21 +16,9 @@ async function fetchServiceBySlug(slug) {
   }
 }
 
-export async function generateStaticParams() {
-  try {
-    const { data } = await axios.get(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/services/getall`
-    );
-
-    return data?.map((service) => ({ slug: service.slug })) || [];
-  } catch (error) {
-    console.error("Error fetching all services for params:", error);
-    return [];
-  }
-}
 
 export async function generateMetadata({ params }) {
-  const { slug } = await params;
+  const { slug } = params; 
   const service = await fetchServiceBySlug(slug);
 
   if (!service) {
@@ -58,7 +48,7 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function ServicePage({ params }) {
-  const { slug } = await params;
+  const { slug } = params; 
   const service = await fetchServiceBySlug(slug);
 
   if (!service) {

@@ -22,9 +22,7 @@ import Autoplay from "embla-carousel-autoplay";
 import { motion, AnimatePresence } from "framer-motion";
 import QuoteForm from "../quote-form";
 
-/* ----------------------------------------------------
-   IMAGE MODAL
----------------------------------------------------- */
+
 const ImageModal = ({ images = [], activeIndex = 0, onClose }) => {
   const [emblaRef, embla] = useEmblaCarousel(
     { loop: true, startIndex: activeIndex },
@@ -46,13 +44,11 @@ const ImageModal = ({ images = [], activeIndex = 0, onClose }) => {
     return () => document.removeEventListener("keydown", handleEsc);
   }, [onClose]);
 
-  // Start autoplay after embla is initialized
   useEffect(() => {
     if (!embla) return;
 
     const autoplayPlugin = embla?.plugins?.()?.autoplay;
     if (autoplayPlugin) {
-      // Small delay to ensure slides are rendered
       const timer = setTimeout(() => {
         autoplayPlugin.play();
       }, 100);
@@ -127,15 +123,10 @@ const ImageModal = ({ images = [], activeIndex = 0, onClose }) => {
   );
 };
 
-/* ----------------------------------------------------
-   SERVICE DETAIL MAIN COMPONENT
----------------------------------------------------- */
 const ServiceDetail = ({ service = {} }) => {
   const router = useRouter();
 
-  /* --------------------------------------------
-     NORMALIZE IMAGES - Safe with optional chaining
-  -------------------------------------------- */
+  
   const allImages = useMemo(() => {
     if (!service?.image || !Array.isArray(service?.image)) return [];
 
@@ -153,13 +144,12 @@ const ServiceDetail = ({ service = {} }) => {
   const [openFeatureIndex, setOpenFeatureIndex] = useState(null);
   const [showFull, setShowFull] = useState(false);
 
-  /* Embla for main slider - Initialize autoplay with playOnInit: false */
   const autoplayOptions = useMemo(
     () => ({
       delay: 4000,
       stopOnInteraction: false,
       stopOnMouseEnter: true,
-      playOnInit: false, // Don't auto-start, we'll start it manually
+      playOnInit: false, 
     }),
     []
   );
@@ -169,7 +159,6 @@ const ServiceDetail = ({ service = {} }) => {
     allImages?.length > 0 ? [Autoplay(autoplayOptions)] : []
   );
 
-  // Initialize autoplay after emblaApi is ready and has slides
   useEffect(() => {
     if (!emblaApi || allImages?.length === 0) return;
 
@@ -177,13 +166,11 @@ const ServiceDetail = ({ service = {} }) => {
       const slideNodes = emblaApi?.slideNodes?.();
       const autoplayPlugin = emblaApi?.plugins?.()?.autoplay;
 
-      // Only start if we have slides and autoplay plugin
       if (slideNodes && slideNodes.length > 0 && autoplayPlugin) {
         autoplayPlugin.play();
       }
     };
 
-    // Small delay to ensure DOM is ready
     const timer = setTimeout(startAutoplay, 150);
 
     return () => clearTimeout(timer);
@@ -198,7 +185,6 @@ const ServiceDetail = ({ service = {} }) => {
     return () => emblaApi?.off("select", onSelect);
   }, [emblaApi]);
 
-  /* Stop/Resume autoplay when modal opens/closes */
   useEffect(() => {
     if (!emblaApi || allImages?.length === 0) return;
 
@@ -208,10 +194,8 @@ const ServiceDetail = ({ service = {} }) => {
     if (modalOpen) {
       autoplayPlugin?.stop?.();
     } else {
-      // Only resume if slides exist
       const slideNodes = emblaApi?.slideNodes?.();
       if (slideNodes && slideNodes.length > 0) {
-        // Small delay before resuming
         const timer = setTimeout(() => {
           autoplayPlugin?.play?.();
         }, 100);
@@ -220,7 +204,6 @@ const ServiceDetail = ({ service = {} }) => {
     }
   }, [modalOpen, emblaApi, allImages?.length]);
 
-  /* Thumbnail reorder */
   const displayedThumbnails = useMemo(() => {
     if (!allImages?.length) return [];
 
@@ -236,7 +219,6 @@ const ServiceDetail = ({ service = {} }) => {
     ];
   }, [allImages, activeImageIndex]);
 
-  /* About section */
   const words = service?.about?.split(" ") ?? [];
   const isLong = words?.length > 100;
 
@@ -261,9 +243,7 @@ const ServiceDetail = ({ service = {} }) => {
 
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid lg:grid-cols-2 gap-12">
-          {/* LEFT SECTION */}
           <div className="space-y-6">
-            {/* MAIN IMAGE SLIDER */}
             {allImages?.length > 0 ? (
               <div
                 ref={emblaRef}
@@ -295,7 +275,6 @@ const ServiceDetail = ({ service = {} }) => {
               </div>
             )}
 
-            {/* THUMBNAILS */}
             {allImages?.length > 0 && (
               <div className="grid grid-cols-4 gap-4">
                 {displayedThumbnails?.slice(0, 4)?.map((thumbnail, idx) => (
@@ -323,7 +302,6 @@ const ServiceDetail = ({ service = {} }) => {
               </div>
             )}
 
-            {/* ABOUT SECTION */}
             {service?.about && (
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">About</h2>
@@ -358,7 +336,6 @@ const ServiceDetail = ({ service = {} }) => {
             )}
           </div>
 
-          {/* RIGHT SECTION */}
           <div className="space-y-8">
             <div>
               <h1 className="text-4xl font-bold text-gray-900 mb-4">
@@ -369,7 +346,6 @@ const ServiceDetail = ({ service = {} }) => {
               </p>
             </div>
 
-            {/* FEATURES LIST */}
             {Array.isArray(service?.features) &&
               service?.features?.length > 0 && (
                 <div>
@@ -424,7 +400,6 @@ const ServiceDetail = ({ service = {} }) => {
                 </div>
               )}
 
-            {/* CTA BUTTONS */}
             <div className="bg-gradient-to-r from-amber-50 to-orange-50 p-8 rounded-2xl text-center space-y-6">
               <div className="flex flex-col sm:flex-row gap-4">
                 <motion.button
